@@ -65,7 +65,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ results, data, advice, loadin
               <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">Annual outlook</h3>
             </div>
             <h4 className="text-3xl font-bold text-slate-800 tracking-tight">Monthly budget estimates</h4>
-            <p className="text-sm text-slate-400 font-medium">Visualization includes fluctuating seasonal energy & growth costs.</p>
+            <p className="text-sm text-slate-400 font-medium">Visualisation includes fluctuating seasonal energy & growth costs.</p>
           </div>
           <div className="flex flex-wrap gap-6 bg-slate-50 p-4 rounded-2xl border border-slate-100">
             <div className="flex items-center gap-2">
@@ -215,10 +215,11 @@ const ResultsView: React.FC<ResultsViewProps> = ({ results, data, advice, loadin
         </div>
       </section>
       
-      <div className="flex justify-center pt-12 pb-20">
+      {/* Reduced Edit Button Section */}
+      <div className="flex justify-center pt-6 pb-12">
         <button 
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="px-8 py-3 text-slate-300 hover:text-blue-600 text-[10px] font-bold uppercase tracking-[0.3em] transition-all border border-transparent hover:border-blue-50 rounded-full"
+          className="px-6 py-2 text-slate-300 hover:text-blue-600 text-[9px] font-bold uppercase tracking-[0.2em] transition-all border border-slate-100 hover:border-blue-100 rounded-full"
         >
           Edit return-to-work details
         </button>
