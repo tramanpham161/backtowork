@@ -1,10 +1,10 @@
 
 import React, { useState } from 'react';
-import { ParentData, PlannerResults } from './types';
-import { generateTimeline, calculateMonthlyCosts } from './utils/plannerEngine';
-import { getPersonalizedAdvice } from './services/geminiService';
-import ResultsView from './components/ResultsView';
-import UsefulLinks from './components/UsefulLinks';
+import { ParentData, PlannerResults } from './types.ts';
+import { generateTimeline, calculateMonthlyCosts } from './utils/plannerEngine.ts';
+import { getPersonalizedAdvice } from './services/geminiService.ts';
+import ResultsView from './components/ResultsView.tsx';
+import UsefulLinks from './components/UsefulLinks.tsx';
 import { Baby, Clock, Calendar as CalendarIcon, PoundSterling, CheckCircle2, ChevronRight, LayoutDashboard, Sparkles, ExternalLink, ShieldCheck } from 'lucide-react';
 
 const App: React.FC = () => {
