@@ -35,7 +35,13 @@
     </style>
     <!-- Shim for process.env to prevent crashes in the browser -->
     <script>
-        window.process = window.process || { env: { NODE_ENV: 'production' } };
+        window.process = window.process || {};
+        window.process.env = window.process.env || {};
+        window.process.env.NODE_ENV = window.process.env.NODE_ENV || 'production';
+        // We ensure API_KEY is at least a string if not defined to prevent SDK crashes at init
+        if (typeof window.process.env.API_KEY === 'undefined') {
+            window.process.env.API_KEY = ''; 
+        }
     </script>
     <!-- Support for Import Maps across all browsers -->
     <script async src="https://ga.jspm.io/npm:es-module-shims@1.10.0/dist/es-module-shims.js"></script>
@@ -72,6 +78,9 @@
             if (display) {
                 display.style.display = 'block';
                 display.textContent = 'Runtime Error: ' + msg + '\nFile: ' + url + '\nLine: ' + lineNo + ':' + columnNo;
+                if (error && error.stack) {
+                    display.textContent += '\n\nStack:\n' + error.stack;
+                }
             }
             return false;
         };
