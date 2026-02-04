@@ -1,9 +1,9 @@
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { format } from 'date-fns';
+import { format, differenceInWeeks, subMonths, startOfMonth } from 'date-fns';
 import { PlannerResults, ParentData } from '../types.ts';
-import { Calendar, MessageCircle, PiggyBank, Briefcase, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Calendar, MessageCircle, PiggyBank, Briefcase, ArrowRight, ShieldCheck, CheckCircle2, Share2, Mail, Info, ThumbsUp, ThumbsDown, Send } from 'lucide-react';
 
 interface ResultsViewProps {
   results: PlannerResults;
@@ -13,8 +13,76 @@ interface ResultsViewProps {
 }
 
 const ResultsView: React.FC<ResultsViewProps> = ({ results, data, advice, loadingAdvice }) => {
+  const [checkedItems, setCheckedItems] = useState<Record<number, boolean>>({});
+  const [feedback, setFeedback] = useState<'yes' | 'no' | null>(null);
+  const [feedbackText, setFeedbackText] = useState('');
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+
+  const toggleCheck = (idx: number) => {
+    setCheckedItems(prev => ({ ...prev, [idx]: !prev[idx] }));
+  };
+
+  const fundingStartDate = useMemo(() => {
+    const eligible = results.fundingMilestones.filter(m => m.isEligible);
+    return eligible.length > 0 ? eligible[0].date : null;
+  }, [results]);
+
+  const gapWeeks = useMemo(() => {
+    const returnDt = new Date(data.returnDate);
+    if (fundingStartDate && returnDt < fundingStartDate) {
+      return differenceInWeeks(fundingStartDate, returnDt);
+    }
+    return 0;
+  }, [data.returnDate, fundingStartDate]);
+
+  const checklistDates = useMemo(() => {
+    if (!fundingStartDate) return { apply: 'ASAP', contact: 'ASAP' };
+    return {
+      apply: format(subMonths(fundingStartDate, 1), 'do MMMM yyyy'),
+      contact: format(subMonths(new Date(data.returnDate), 6), 'MMMM yyyy')
+    };
+  }, [fundingStartDate, data.returnDate]);
+
+  const handleShare = async () => {
+    const text = `Check out my return to work plan for ${data.childName}! Returns on ${format(new Date(data.returnDate), 'PPP')}.`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'BackToWork Planner', text, url: window.location.href });
+      } catch (err) { console.log(err); }
+    } else {
+      window.location.href = `mailto:?subject=Return to work plan for ${data.childName}&body=${text}`;
+    }
+  };
+
+  const checklistItems = [
+    `Contact 2–3 childcare providers to confirm availability and start dates.`,
+    `Apply for childcare code by ${checklistDates.apply} (one month before funding starts).`,
+    `Contact nurseries by ${checklistDates.contact} to secure your spot.`,
+    `Ask employer about flexible hours and phased return options.`,
+    `Reconfirm eligibility every 3 months on GOV.UK.`,
+    `Plan for settling-in time (usually 1-2 weeks) and backup care.`,
+    `Save or share this plan with your partner or support network.`
+  ];
+
   return (
     <div className="space-y-16 animate-in fade-in slide-in-from-bottom-8 duration-1000 fill-mode-both">
+      
+      {/* Top Actions */}
+      <div className="flex flex-wrap justify-end gap-3 -mb-8">
+        <button 
+          onClick={handleShare}
+          className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-2xl text-[11px] font-bold text-slate-600 uppercase tracking-wider hover:bg-slate-50 transition-all shadow-sm"
+        >
+          <Share2 size={14} className="text-blue-500" /> Share with partner
+        </button>
+        <button 
+          onClick={() => window.location.href = `mailto:?subject=My BackToWork Plan&body=Planning return for ${data.childName} on ${data.returnDate}.`}
+          className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-2xl text-[11px] font-bold text-slate-600 uppercase tracking-wider hover:bg-slate-50 transition-all shadow-sm"
+        >
+          <Mail size={14} className="text-blue-500" /> Email to myself
+        </button>
+      </div>
+
       {/* Empathetic Intro */}
       <section className="bg-white border border-slate-200/50 p-8 md:p-12 rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
         <div className="flex items-center gap-3 mb-8">
@@ -36,8 +104,22 @@ const ResultsView: React.FC<ResultsViewProps> = ({ results, data, advice, loadin
         )}
       </section>
 
-      {/* Timeline Section */}
+      {/* Gap Warning & Milestones */}
       <section className="space-y-8 px-2">
+        {gapWeeks > 0 && (
+          <div className="bg-amber-50 border border-amber-100 p-6 rounded-3xl flex items-start gap-4 animate-in zoom-in-95 duration-500">
+            <div className="bg-amber-100 p-2 rounded-xl text-amber-600 mt-0.5">
+              <Info size={18} />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-amber-900">Self-funded gap detected</p>
+              <p className="text-xs text-amber-700 font-medium mt-1 leading-relaxed">
+                You may need to cover childcare costs for ~{gapWeeks} weeks before your first government funding milestone kicks in on {format(fundingStartDate!, 'do MMM yyyy')}.
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center gap-2 mb-4">
           <Calendar className="w-4 h-4 text-blue-400" />
           <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">Funding milestones</h3>
@@ -103,6 +185,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ results, data, advice, loadin
                 className="font-bold text-slate-300"
               />
               <Tooltip 
+                formatter={(value) => `£${value}`}
                 contentStyle={{ 
                   borderRadius: '20px', 
                   border: 'none', 
@@ -141,21 +224,34 @@ const ResultsView: React.FC<ResultsViewProps> = ({ results, data, advice, loadin
             </ComposedChart>
           </ResponsiveContainer>
         </div>
-        
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-12 pt-10 border-t border-slate-50">
-          <div className="space-y-4">
-            <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">About the numbers</h5>
-            <p className="text-sm text-slate-500 leading-relaxed font-medium">
-              We base "Essentials" on £480/mo (CPAG averages) plus a £120 return-to-work incremental shift. 
-              The chart accounts for higher heating costs in winter and growing child expenses.
-            </p>
+      </section>
+
+      {/* Checklist Section */}
+      <section className="bg-slate-900 p-10 md:p-14 rounded-[3rem] text-white">
+        <div className="max-w-3xl">
+          <div className="flex items-center gap-2 mb-6">
+            <CheckCircle2 className="w-4 h-4 text-blue-400" />
+            <h3 className="text-[11px] font-bold text-blue-400 uppercase tracking-[0.2em]">What to do next</h3>
           </div>
+          <h4 className="text-3xl font-bold mb-6 tracking-tight">Your transition roadmap</h4>
+          <p className="text-slate-400 mb-10 text-sm font-medium leading-relaxed">
+            You don’t need to decide everything today — this is your starting point. Use these checkboxes to track your progress.
+          </p>
           <div className="space-y-4">
-            <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nursery top-ups</h5>
-            <p className="text-sm text-slate-500 leading-relaxed font-medium">
-              Funding covers the cost of childcare, but not consumables like snacks, wipes, or nappies. 
-              Expect small daily surcharges depending on your provider.
-            </p>
+            {checklistItems.map((item, i) => (
+              <div 
+                key={i} 
+                onClick={() => toggleCheck(i)}
+                className={`flex items-start gap-4 p-5 rounded-2xl border transition-all cursor-pointer group ${checkedItems[i] ? 'bg-white/5 border-white/10 opacity-60' : 'bg-white/10 border-white/20 hover:border-blue-400'}`}
+              >
+                <div className={`w-6 h-6 rounded-lg border-2 mt-0.5 flex items-center justify-center transition-colors ${checkedItems[i] ? 'bg-blue-500 border-blue-500' : 'border-slate-500 group-hover:border-blue-400'}`}>
+                  {checkedItems[i] && <CheckCircle2 size={14} />}
+                </div>
+                <span className={`text-[15px] font-medium leading-relaxed ${checkedItems[i] ? 'line-through text-slate-500' : 'text-slate-200'}`}>
+                  {item}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -164,7 +260,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ results, data, advice, loadin
       <div className="grid md:grid-cols-2 gap-8">
         <div className="bg-white p-10 rounded-[2rem] border border-slate-200/60 shadow-sm">
           <h4 className="text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em] mb-8 flex items-center gap-2">
-            <MessageCircle className="w-4 h-4" /> Nursery prep
+            <MessageCircle className="w-4 h-4" /> WHAT TO ASK YOUR CHILDCARE PROVIDER?
           </h4>
           <ul className="space-y-6">
             {(advice?.nurseryQuestions || []).map((q: string, i: number) => (
@@ -177,7 +273,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ results, data, advice, loadin
         </div>
         <div className="bg-white p-10 rounded-[2rem] border border-slate-200/60 shadow-sm">
           <h4 className="text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em] mb-8 flex items-center gap-2">
-            <Briefcase className="w-4 h-4" /> Employer chat
+            <Briefcase className="w-4 h-4" /> WHAT TO ASK YOUR EMPLOYER?
           </h4>
           <ul className="space-y-6">
             {(advice?.employerQuestions || []).map((q: string, i: number) => (
@@ -190,13 +286,36 @@ const ResultsView: React.FC<ResultsViewProps> = ({ results, data, advice, loadin
         </div>
       </div>
 
+      {/* Employer Conversation Helper */}
+      <section className="bg-slate-50 p-10 md:p-12 rounded-[2.5rem] border border-slate-100">
+        <h4 className="text-lg font-bold text-slate-800 mb-8 flex items-center gap-2">
+          <Briefcase className="w-5 h-5 text-blue-500" /> Talking to your employer – quick tips
+        </h4>
+        <div className="grid md:grid-cols-2 gap-x-12 gap-y-6">
+          {[
+            "You don’t need a fully fixed plan to start the conversation.",
+            "It’s okay to raise this early. It helps everyone plan.",
+            "Frame it as a discussion, not a request.",
+            "Ask about temporary flexibility (phased return, adjusted hours, hybrid).",
+            "Be clear about what you can commit to, even if some details are unknown.",
+            "Check if anything needs to be confirmed in writing.",
+            "You’re allowed to ask: flexibility is about sustainability, not commitment."
+          ].map((tip, i) => (
+            <div key={i} className="flex gap-4">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 shrink-0"></div>
+              <p className="text-[13px] font-medium text-slate-600 leading-relaxed">{tip}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Verification Card */}
       <section className="bg-blue-600 p-10 md:p-14 rounded-[3rem] text-white flex flex-col md:flex-row items-center gap-12 shadow-2xl shadow-blue-100 border border-blue-500 overflow-hidden relative">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20 blur-3xl pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/5 rounded-full -ml-20 -mb-20 blur-3xl pointer-events-none"></div>
         
         <div className="flex-1 text-center md:text-left space-y-6 relative z-10">
-          <h3 className="text-3xl font-bold tracking-tight">Check your eligbility</h3>
+          <h3 className="text-3xl font-bold tracking-tight">Final step: verify details</h3>
           <p className="text-blue-100 text-base leading-relaxed max-w-md font-medium opacity-90">
             For specific household income checks and to see exactly how your local nursery applies top-up fees, use the primary checker tool.
           </p>
@@ -214,7 +333,61 @@ const ResultsView: React.FC<ResultsViewProps> = ({ results, data, advice, loadin
           <ShieldCheck size={180} strokeWidth={1} />
         </div>
       </section>
+
+      {/* Feedback System */}
+      <section className="bg-white p-10 rounded-[2.5rem] border border-slate-200 text-center space-y-8">
+        {!feedbackSubmitted ? (
+          <>
+            <h4 className="text-lg font-bold text-slate-800 tracking-tight">Was this roadmap helpful?</h4>
+            <div className="flex justify-center gap-4">
+              <button 
+                onClick={() => setFeedback('yes')}
+                className={`flex items-center gap-2 px-8 py-3 rounded-2xl font-bold transition-all ${feedback === 'yes' ? 'bg-blue-600 text-white shadow-lg' : 'bg-slate-50 text-slate-600 hover:bg-slate-100'}`}
+              >
+                <ThumbsUp size={18} /> Yes
+              </button>
+              <button 
+                onClick={() => setFeedback('no')}
+                className={`flex items-center gap-2 px-8 py-3 rounded-2xl font-bold transition-all ${feedback === 'no' ? 'bg-blue-600 text-white shadow-lg' : 'bg-slate-50 text-slate-600 hover:bg-slate-100'}`}
+              >
+                <ThumbsDown size={18} /> No
+              </button>
+            </div>
+            {feedback && (
+              <div className="max-w-md mx-auto space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
+                <textarea 
+                  value={feedbackText}
+                  onChange={(e) => setFeedbackText(e.target.value)}
+                  placeholder="Any suggestions for us? (Optional)"
+                  className="w-full p-4 rounded-2xl border border-slate-200 text-sm focus:border-blue-400 outline-none h-24 resize-none"
+                />
+                <button 
+                  onClick={() => setFeedbackSubmitted(true)}
+                  className="w-full py-3.5 bg-slate-800 text-white rounded-2xl font-bold text-sm hover:bg-slate-900 transition-all flex items-center justify-center gap-2"
+                >
+                  <Send size={16} /> Send feedback
+                </button>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="animate-in zoom-in-95 duration-500">
+            <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle2 size={24} />
+            </div>
+            <h4 className="text-lg font-bold text-slate-800">Thank you for your feedback!</h4>
+            <p className="text-slate-400 text-sm font-medium mt-1">We're constantly improving to help more parents.</p>
+          </div>
+        )}
+      </section>
       
+      {/* Disclaimer */}
+      <div className="px-6 text-center space-y-4 opacity-60">
+        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed max-w-2xl mx-auto">
+          This tool gives guidance, not official confirmation. Always double-check eligibility via GOV.UK. Designed for England. Works best for parents planning return within 18 months.
+        </p>
+      </div>
+
       {/* Refined Edit Button Section */}
       <div className="flex justify-center py-4">
         <button 
