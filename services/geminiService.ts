@@ -72,7 +72,7 @@ function getFallbackAdvice(data: ParentData) {
   return {
     supportMessage: `You're doing an amazing job preparing for your return to work. While it's natural to feel some transition stress, having a plan for ${name} and utilizing ${fundingText} will make a world of difference for your family's new chapter.`,
     nurseryQuestions: [
-      `How do you apply the 30 hours funding for ${name}—can I 'stretch' it over the whole year (52 weeks)?`,
+      `How do you apply the 30 hours funding for ${name}. Can I 'stretch' it over the whole year (52 weeks)?`,
       "What are the daily 'consumables' or service charges for funded sessions?",
       "How many spaces do you have allocated for the 9-month-old 30-hour entitlement?",
       "What is your policy on changing days if my work requirements shift?",
