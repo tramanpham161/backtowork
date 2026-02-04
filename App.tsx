@@ -191,7 +191,7 @@ const App: React.FC = () => {
                   disabled={loading}
                   className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4.5 rounded-2xl shadow-lg shadow-blue-100 transition-all flex items-center justify-center gap-3 group ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
                 >
-                  {loading ? 'Analyzing...' : 'Generate my roadmap'}
+                  {loading ? 'Analysing...' : 'Generate my roadmap'}
                   {!loading && <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />}
                 </button>
               </form>
