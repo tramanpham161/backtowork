@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { format, differenceInWeeks, subMonths, startOfMonth } from 'date-fns';
 import { PlannerResults, ParentData } from '../types.ts';
-import { Calendar, MessageCircle, PiggyBank, Briefcase, ArrowRight, ShieldCheck, CheckCircle2, Share2, Mail, Info, ThumbsUp, ThumbsDown, Send } from 'lucide-react';
+import { Calendar, MessageCircle, PiggyBank, Briefcase, ArrowRight, ShieldCheck, CheckCircle2, Share2, Mail, Info, ThumbsUp, ThumbsDown, Send, Lightbulb } from 'lucide-react';
 
 interface ResultsViewProps {
   results: PlannerResults;
@@ -55,13 +55,13 @@ const ResultsView: React.FC<ResultsViewProps> = ({ results, data, advice, loadin
   };
 
   const checklistItems = [
-    `Contact 2–3 childcare providers to confirm availability and start dates.`,
-    `Apply for childcare code by ${checklistDates.apply} (one month before funding starts).`,
-    `Contact nurseries by ${checklistDates.contact} to secure your spot.`,
-    `Ask employer about flexible hours and phased return options.`,
+    `Contact 2–3 childcare providers to confirm availability.`,
+    `Apply for childcare code by ${checklistDates.apply}.`,
+    `Contact nurseries by ${checklistDates.contact} to secure a spot.`,
+    `Discuss flexible hours/phased return with employer.`,
     `Reconfirm eligibility every 3 months on GOV.UK.`,
-    `Plan for settling-in time (usually 1-2 weeks) and backup care.`,
-    `Save or share this plan with your partner or support network.`
+    `Plan for 1-2 weeks of settling-in time.`,
+    `Share this plan with your partner or network.`
   ];
 
   return (
@@ -226,28 +226,32 @@ const ResultsView: React.FC<ResultsViewProps> = ({ results, data, advice, loadin
         </div>
       </section>
 
-      {/* Checklist Section */}
-      <section className="bg-slate-900 p-10 md:p-14 rounded-[3rem] text-white">
-        <div className="max-w-3xl">
-          <div className="flex items-center gap-2 mb-6">
-            <CheckCircle2 className="w-4 h-4 text-blue-400" />
-            <h3 className="text-[11px] font-bold text-blue-400 uppercase tracking-[0.2em]">What to do next</h3>
+      {/* Transition Roadmap - Compact Version */}
+      <section className="bg-slate-900 py-8 px-10 md:px-14 rounded-[2.5rem] text-white">
+        <div className="max-w-4xl">
+          <div className="flex items-center gap-2 mb-4">
+            <CheckCircle2 className="w-3 h-3 text-blue-400" />
+            <h3 className="text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em]">Next steps</h3>
           </div>
-          <h4 className="text-3xl font-bold mb-6 tracking-tight">Your transition roadmap</h4>
-          <p className="text-slate-400 mb-10 text-sm font-medium leading-relaxed">
-            You don’t need to decide everything today — this is your starting point. Use these checkboxes to track your progress.
-          </p>
-          <div className="space-y-4">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+            <div>
+              <h4 className="text-2xl font-bold tracking-tight">Transition Roadmap</h4>
+              <p className="text-slate-400 mt-2 text-xs font-medium leading-relaxed max-w-xl">
+                Track your progress. You don’t need to decide everything today — this is just a starting point.
+              </p>
+            </div>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-3">
             {checklistItems.map((item, i) => (
               <div 
                 key={i} 
                 onClick={() => toggleCheck(i)}
-                className={`flex items-start gap-4 p-5 rounded-2xl border transition-all cursor-pointer group ${checkedItems[i] ? 'bg-white/5 border-white/10 opacity-60' : 'bg-white/10 border-white/20 hover:border-blue-400'}`}
+                className={`flex items-start gap-3 p-3.5 rounded-xl border transition-all cursor-pointer group ${checkedItems[i] ? 'bg-white/5 border-white/5 opacity-50' : 'bg-white/10 border-white/10 hover:border-blue-500'}`}
               >
-                <div className={`w-6 h-6 rounded-lg border-2 mt-0.5 flex items-center justify-center transition-colors ${checkedItems[i] ? 'bg-blue-500 border-blue-500' : 'border-slate-500 group-hover:border-blue-400'}`}>
-                  {checkedItems[i] && <CheckCircle2 size={14} />}
+                <div className={`w-5 h-5 rounded border-2 mt-0.5 flex items-center justify-center transition-colors shrink-0 ${checkedItems[i] ? 'bg-blue-500 border-blue-500' : 'border-slate-600 group-hover:border-blue-400'}`}>
+                  {checkedItems[i] && <CheckCircle2 size={12} />}
                 </div>
-                <span className={`text-[15px] font-medium leading-relaxed ${checkedItems[i] ? 'line-through text-slate-500' : 'text-slate-200'}`}>
+                <span className={`text-[13px] font-medium leading-tight ${checkedItems[i] ? 'line-through text-slate-500' : 'text-slate-200'}`}>
                   {item}
                 </span>
               </div>
@@ -286,36 +290,43 @@ const ResultsView: React.FC<ResultsViewProps> = ({ results, data, advice, loadin
         </div>
       </div>
 
-      {/* Employer Conversation Helper */}
-      <section className="bg-slate-50 p-10 md:p-12 rounded-[2.5rem] border border-slate-100">
-        <h4 className="text-lg font-bold text-slate-800 mb-8 flex items-center gap-2">
-          <Briefcase className="w-5 h-5 text-blue-500" /> Talking to your employer – quick tips
-        </h4>
-        <div className="grid md:grid-cols-2 gap-x-12 gap-y-6">
-          {[
-            "You don’t need a fully fixed plan to start the conversation.",
-            "It’s okay to raise this early. It helps everyone plan.",
-            "Frame it as a discussion, not a request.",
-            "Ask about temporary flexibility (phased return, adjusted hours, hybrid).",
-            "Be clear about what you can commit to, even if some details are unknown.",
-            "Check if anything needs to be confirmed in writing.",
-            "You’re allowed to ask: flexibility is about sustainability, not commitment."
-          ].map((tip, i) => (
-            <div key={i} className="flex gap-4">
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 shrink-0"></div>
-              <p className="text-[13px] font-medium text-slate-600 leading-relaxed">{tip}</p>
-            </div>
-          ))}
+      {/* Before you talk to your employer - Redesigned */}
+      <section className="bg-white p-10 md:p-14 rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden relative">
+        <div className="absolute top-0 right-0 p-8 text-slate-50/50 pointer-events-none">
+          <Lightbulb size={120} strokeWidth={1} />
+        </div>
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-6">
+            <Briefcase className="w-4 h-4 text-blue-500" />
+            <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">Strategy</h3>
+          </div>
+          <h4 className="text-3xl font-bold text-slate-800 mb-10 tracking-tight">Before you talk to your employer</h4>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { title: "Start Early", text: "You don’t need a fully fixed plan to start. Early chats help everyone plan better." },
+              { title: "Framing", text: "Frame it as a collaborative discussion about your transition, not just a set of requests." },
+              { title: "Flexibility", text: "Ask about temporary options like a phased return or temporary hybrid working." },
+              { title: "Commitment", text: "Be clear about what you can commit to, even if some childcare details are still unknown." },
+              { title: "Confirmation", text: "Always check if agreements need to be confirmed in writing via email or HR." },
+              { title: "Sustainability", text: "Remember: flexibility is about long-term sustainability, not just a one-off favor." }
+            ].map((tip, i) => (
+              <div key={i} className="bg-slate-50/50 p-6 rounded-2xl border border-slate-100/80 hover:bg-white hover:border-blue-100 transition-all group">
+                <h5 className="text-[13px] font-bold text-slate-800 mb-2 group-hover:text-blue-600 transition-colors">{tip.title}</h5>
+                <p className="text-xs text-slate-500 leading-relaxed font-medium">{tip.text}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Verification Card */}
+      {/* Verification Card - Title Changed */}
       <section className="bg-blue-600 p-10 md:p-14 rounded-[3rem] text-white flex flex-col md:flex-row items-center gap-12 shadow-2xl shadow-blue-100 border border-blue-500 overflow-hidden relative">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20 blur-3xl pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/5 rounded-full -ml-20 -mb-20 blur-3xl pointer-events-none"></div>
         
         <div className="flex-1 text-center md:text-left space-y-6 relative z-10">
-          <h3 className="text-3xl font-bold tracking-tight">Final step: verify details</h3>
+          <h3 className="text-3xl font-bold tracking-tight">Check your eligibility</h3>
           <p className="text-blue-100 text-base leading-relaxed max-w-md font-medium opacity-90">
             For specific household income checks and to see exactly how your local nursery applies top-up fees, use the primary checker tool.
           </p>
