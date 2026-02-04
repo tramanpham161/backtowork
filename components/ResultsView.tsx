@@ -2,7 +2,7 @@
 import React from 'react';
 import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { format } from 'date-fns';
-import { PlannerResults, ParentData } from '../types';
+import { PlannerResults, ParentData } from '../types.ts';
 import { Calendar, MessageCircle, PiggyBank, Briefcase, ArrowRight, ShieldCheck } from 'lucide-react';
 
 interface ResultsViewProps {
