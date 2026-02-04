@@ -196,7 +196,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ results, data, advice, loadin
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/5 rounded-full -ml-20 -mb-20 blur-3xl pointer-events-none"></div>
         
         <div className="flex-1 text-center md:text-left space-y-6 relative z-10">
-          <h3 className="text-3xl font-bold tracking-tight">Final step: verify details</h3>
+          <h3 className="text-3xl font-bold tracking-tight">Check your eligbility</h3>
           <p className="text-blue-100 text-base leading-relaxed max-w-md font-medium opacity-90">
             For specific household income checks and to see exactly how your local nursery applies top-up fees, use the primary checker tool.
           </p>
