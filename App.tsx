@@ -25,6 +25,7 @@ const App: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setAdvice(null); // Clear old advice immediately
     
     setTimeout(async () => {
       const milestones = generateTimeline(formData);
