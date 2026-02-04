@@ -1,6 +1,6 @@
 
 import { addMonths, startOfMonth, format, isAfter, isBefore, addYears, eachMonthOfInterval } from 'date-fns';
-import { ParentData, FundingMilestone, MonthlyCost } from '../types';
+import { ParentData, FundingMilestone, MonthlyCost } from '../types.ts';
 
 export const calculateFundingStart = (dob: Date, years: number, months: number = 0): Date => {
   const milestoneDate = addMonths(addYears(dob, years), months);
@@ -60,8 +60,6 @@ export const calculateMonthlyCosts = (data: ParentData, milestones: FundingMiles
 
   return months.map((m, index) => {
     // VARIABILITY INJECTED: Simulate seasonal/age growth variations
-    // Winter months (Nov, Dec, Jan, Feb) have higher energy costs (+£40)
-    // Child age adds a tiny increase each month as they eat/grow more (+£5/month)
     const monthIndex = m.getMonth();
     const isWinter = [10, 11, 0, 1].includes(monthIndex);
     const seasonalShift = isWinter ? 45 : 0;
