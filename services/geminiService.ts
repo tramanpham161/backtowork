@@ -2,9 +2,15 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { ParentData } from "../types.ts";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 export async function getPersonalizedAdvice(data: ParentData) {
+  // Check for API key existence safely
+  const apiKey = process.env.API_KEY;
+  
+  if (!apiKey) {
+    console.warn("API_KEY is missing. Returning fallback advice.");
+    return getFallbackAdvice();
+  }
+
   const prompt = `
     Generate empathetic return-to-work advice and nursery interview questions for a UK parent.
     CONTEXT: The year is 2026. The UK Government has fully rolled out 30 hours of free childcare for eligible working parents of children from 9 months old up to school age.
@@ -23,6 +29,7 @@ export async function getPersonalizedAdvice(data: ParentData) {
   `;
 
   try {
+    const ai = new GoogleGenAI({ apiKey });
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
@@ -46,23 +53,27 @@ export async function getPersonalizedAdvice(data: ParentData) {
       }
     });
 
-    return JSON.parse(response.text);
+    return JSON.parse(response.text || '{}');
   } catch (error) {
     console.error("Gemini Error:", error);
-    return {
-      supportMessage: "You're doing an amazing job. Returning to work is a big transition, but with the 30-hour funding now fully available for younger children, the financial path is clearer. Your career and your family can both thrive.",
-      nurseryQuestions: [
-        "How do you apply the 30 hours funding—can I 'stretch' it over the whole year (52 weeks)?",
-        "What are the daily 'consumables' or service charges for funded sessions?",
-        "How many spaces do you have allocated for the 9-month-old 30-hour entitlement?",
-        "What is your policy on changing days if my work requirements shift?",
-        "Do you assist with the HMRC re-confirmation codes every 3 months?"
-      ],
-      employerQuestions: [
-        "Is there a phased return-to-work option available to help with nursery settling-in?",
-        "What is the current policy for emergency family leave for minor illnesses?",
-        "How will my performance targets be adjusted during the transition period?"
-      ]
-    };
+    return getFallbackAdvice();
   }
+}
+
+function getFallbackAdvice() {
+  return {
+    supportMessage: "You're doing an amazing job. Returning to work is a big transition, but with the 30-hour funding now fully available for younger children, the financial path is clearer. Your career and your family can both thrive.",
+    nurseryQuestions: [
+      "How do you apply the 30 hours funding—can I 'stretch' it over the whole year (52 weeks)?",
+      "What are the daily 'consumables' or service charges for funded sessions?",
+      "How many spaces do you have allocated for the 9-month-old 30-hour entitlement?",
+      "What is your policy on changing days if my work requirements shift?",
+      "Do you assist with the HMRC re-confirmation codes every 3 months?"
+    ],
+    employerQuestions: [
+      "Is there a phased return-to-work option available to help with nursery settling-in?",
+      "What is the current policy for emergency family leave for minor illnesses?",
+      "How will my performance targets be adjusted during the transition period?"
+    ]
+  };
 }
