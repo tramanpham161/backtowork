@@ -215,11 +215,11 @@ const ResultsView: React.FC<ResultsViewProps> = ({ results, data, advice, loadin
         </div>
       </section>
       
-      {/* Reduced Edit Button Section */}
-      <div className="flex justify-center pt-6 pb-12">
+      {/* Refined Edit Button Section */}
+      <div className="flex justify-center py-4">
         <button 
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="px-6 py-2 text-slate-300 hover:text-blue-600 text-[9px] font-bold uppercase tracking-[0.2em] transition-all border border-slate-100 hover:border-blue-100 rounded-full"
+          className="px-6 py-2.5 text-slate-400 hover:text-blue-600 text-[11px] font-bold uppercase tracking-[0.2em] transition-all border border-slate-200 hover:border-blue-200 rounded-full bg-white/50 backdrop-blur-sm"
         >
           Edit return-to-work details
         </button>
